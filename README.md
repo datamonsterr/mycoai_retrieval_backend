@@ -1,6 +1,8 @@
 # MycoAI Retrieval Backend
 
-FastAPI backend for retrieval, indexing, and scientist-facing data management workflows around `fungal-cv-qdrant`.
+FastAPI backend for retrieval, indexing, and scientist-facing data management
+workflows around `fungal-cv-qdrant`, especially outputs from the
+`retrieval` and `kmeans_segmentation` experiment pipelines.
 
 ## Stack
 
@@ -27,3 +29,12 @@ uv run pytest
 
 - `GET /health` - healthcheck endpoint
 - `GET /` - service metadata
+
+## Product Boundary
+
+- Backend features may inspect `../fungal-cv-qdrant/src/experiments/` to
+  understand validated experiment behavior.
+- Backend code and tests MUST reimplement product behavior locally and MUST NOT
+  import runtime code directly from `fungal-cv-qdrant/`.
+- Changes derived from experiment outputs should document the source command,
+  artifact, and consumer API surface in the accompanying spec or PR.
