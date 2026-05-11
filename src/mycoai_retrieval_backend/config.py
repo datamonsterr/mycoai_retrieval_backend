@@ -33,6 +33,30 @@ class Settings(BaseSettings):
     jwt_refresh_token_expire_days: int = 7
 
 
+class QdrantSettings(BaseSettings):
+    model_config = SettingsConfigDict(
+        env_prefix="MYCOAI_QDRANT_",
+        env_file=".env",
+        extra="ignore",
+    )
+
+    host: str = "localhost"
+    port: int = 6333
+    grpc_port: int = 6334
+    collection_name: str = "myco_fungi_features_full_finetuned"
+    default_vector_name: str = "EfficientNetB1_finetuned"
+    prefer_grpc: bool = False
+    timeout_seconds: int = 30
+    batch_timeout_seconds: int = 300
+    api_key: str | None = None
+    url: str | None = None
+
+
 @lru_cache(maxsize=1)
 def get_settings() -> Settings:
     return Settings()
+
+
+@lru_cache(maxsize=1)
+def get_qdrant_settings() -> QdrantSettings:
+    return QdrantSettings()

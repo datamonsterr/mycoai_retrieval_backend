@@ -7,6 +7,7 @@ from .api.router import router as api_router
 from .config import get_settings
 from .core.exceptions import AppError
 from .core.middleware import RequestIDMiddleware, RequestLoggingMiddleware
+from .routers.search import router as search_router
 from .schemas import ProblemDetails
 
 
@@ -30,6 +31,7 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
     app.include_router(api_router, prefix=settings.api_prefix)
+    app.include_router(search_router)
 
     @app.exception_handler(AppError)
     async def app_error_handler(request: Request, exc: AppError) -> JSONResponse:
