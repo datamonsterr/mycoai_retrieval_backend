@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from functools import lru_cache
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -15,6 +17,24 @@ class Settings(BaseSettings):
     host: str = "0.0.0.0"
     port: int = 8000
     api_prefix: str = "/api"
+
+    # Database
+    database_url: str = "postgresql+asyncpg://mycoai:mycoai@localhost:5432/mycoai"
+
+    # Qdrant
+    qdrant_host: str = "localhost"
+    qdrant_port: int = 6333
+    qdrant_api_key: str = ""
+
+    # Celery / Redis
+    celery_broker_url: str = "redis://localhost:6379/0"
+    celery_result_backend: str = "redis://localhost:6379/0"
+
+    # JWT Auth
+    jwt_secret_key: str = "change-me-in-production"
+    jwt_algorithm: str = "HS256"
+    jwt_access_token_expire_minutes: int = 30
+    jwt_refresh_token_expire_days: int = 7
 
 
 @lru_cache(maxsize=1)
