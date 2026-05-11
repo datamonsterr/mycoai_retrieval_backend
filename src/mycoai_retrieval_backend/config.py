@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from functools import lru_cache
 
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -17,6 +18,10 @@ class Settings(BaseSettings):
     host: str = "0.0.0.0"
     port: int = 8000
     api_prefix: str = "/api"
+    database_url: str = Field(
+        default="sqlite+aiosqlite:///./mycoai.db",
+        validation_alias="DATABASE_URL",
+    )
 
     # Database
     database_url: str = "postgresql+asyncpg://mycoai:mycoai@localhost:5432/mycoai"
