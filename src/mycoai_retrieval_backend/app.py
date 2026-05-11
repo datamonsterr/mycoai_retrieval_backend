@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 
 from .config import get_settings
+from .routers.retrieval import router as retrieval_router
 
 
 def create_app() -> FastAPI:
@@ -12,6 +13,7 @@ def create_app() -> FastAPI:
         docs_url="/docs",
         redoc_url="/redoc",
     )
+    app.include_router(retrieval_router, prefix=settings.api_prefix)
 
     @app.get("/health", tags=["health"])
     def healthcheck() -> dict[str, str]:
