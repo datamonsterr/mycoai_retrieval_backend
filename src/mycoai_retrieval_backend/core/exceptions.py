@@ -1,47 +1,47 @@
-from http import HTTPStatus
-
-from fastapi import FastAPI, Request
-from fastapi.responses import JSONResponse
-from pydantic import BaseModel
-
-
-class ProblemDetail(BaseModel):
-    type: str = "about:blank"
-    title: str
-    status: int
-    detail: str
-    instance: str
+from typing import Any
 
 
 class AppError(Exception):
-    def __init__(self, title: str, status_code: int, detail: str) -> None:
-        self.title = title
-        self.status_code = status_code
+    status_code: int = 500
+    error_type: str = "https://api.mycoai.dev/errors/internal"
+    title: str = "Internal Server Error"
+
+    def __init__(self, detail: str = "", **extra: Any) -> None:
         self.detail = detail
+        self.extra = extra
 
 
-def problem_response(request: Request, error: AppError) -> JSONResponse:
-    problem = ProblemDetail(
-        title=error.title,
-        status=error.status_code,
-        detail=error.detail,
-        instance=str(request.url.path),
-    )
-    return JSONResponse(status_code=error.status_code, content=problem.model_dump())
+class NotFoundError(AppError):
+    status_code = 404
+    error_type = "https://api.mycoai.dev/errors/not-found"
+    title = "Resource Not Found"
 
 
-def register_exception_handlers(app: FastAPI) -> None:
-    @app.exception_handler(AppError)
-    async def app_error_handler(request: Request, error: AppError) -> JSONResponse:
-        return problem_response(request, error)
+class AuthenticationError(AppError):
+    status_code = 401
+    error_type = "https://api.mycoai.dev/errors/authentication"
+    title = "Authentication Failed"
 
-    @app.exception_handler(404)
-    async def not_found_handler(request: Request, error: Exception) -> JSONResponse:
-        return problem_response(
-            request,
-            AppError(
-                title=HTTPStatus.NOT_FOUND.phrase,
-                status_code=HTTPStatus.NOT_FOUND.value,
-                detail="Resource not found",
-            ),
-        )
+
+class AuthorizationError(AppError):
+    status_code = 403
+    error_type = "https://api.mycoai.dev/errors/authorization"
+    title = "Forbidden"
+
+
+class ValidationError(AppError):
+    status_code = 400
+    error_type = "https://api.mycoai.dev/errors/validation"
+    title = "Validation Error"
+
+    def __init__(
+        self, detail: str = "", errors: list[dict[str, str]] | None = None
+    ) -> None:
+        super().__init__(detail)
+        self.errors = errors or []
+
+
+class ConflictError(AppError):
+    status_code = 409
+    error_type = "https://api.mycoai.dev/errors/conflict"
+    title = "Conflict"

@@ -1,10 +1,10 @@
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
 
-from .api.router import api_router
+from .api.router import router as api_router
 from .config import get_settings
-from .core.exceptions import register_exception_handlers
-from .core.middleware import RequestIDMiddleware, RequestLoggingMiddleware
+from .core.exceptions import AppError
+from .schemas import ProblemDetails
 
 
 def create_app() -> FastAPI:
@@ -17,18 +17,22 @@ def create_app() -> FastAPI:
         redoc_url="/redoc",
     )
 
-    app.add_middleware(
-        CORSMiddleware,
-        allow_origins=["*"],
-        allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
-    )
-    app.add_middleware(RequestIDMiddleware)
-    app.add_middleware(RequestLoggingMiddleware)
+    app.include_router(api_router, prefix=settings.api_prefix)
 
-    register_exception_handlers(app)
-    app.include_router(api_router)
+    @app.exception_handler(AppError)
+    async def app_error_handler(request: Request, exc: AppError) -> JSONResponse:
+        body = ProblemDetails(
+            type=exc.error_type,
+            title=exc.title,
+            status=exc.status_code,
+            detail=exc.detail,
+            instance=str(request.url.path),
+            errors=getattr(exc, "errors", None),
+        )
+        return JSONResponse(
+            status_code=exc.status_code,
+            content=body.model_dump(exclude_none=True),
+        )
 
     @app.get("/health", tags=["health"])
     def healthcheck() -> dict[str, str]:

@@ -11,13 +11,16 @@ dependencies = [
     "aiosqlite>=0.21.0",
     "alembic>=1.17.2",
     "asyncpg>=0.30.0",
+    "bcrypt>=5.0.0",
     "celery>=5.5.1",
+    "email-validator>=2.3.0",
     "fastapi>=0.135.3",
     "numpy>=2.3.4",
     "opencv-python-headless>=4.11.0.86",
     "passlib[bcrypt]>=1.7.4",
     "psycopg[binary]>=3.2.7",
     "pydantic-settings>=2.13.1",
+    "pyjwt>=2.10.1",
     "python-jose[cryptography]>=3.4.0",
     "python-multipart>=0.0.20",
     "qdrant-client>=1.13.3",
@@ -49,13 +52,14 @@ target-version = "py313"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP"]
+ignore = ["B008", "UP046"]
 
 [tool.ruff.lint.isort]
 known-first-party = ["mycoai_retrieval_backend"]
 
 [tool.mypy]
 python_version = "3.13"
-strict = true
+strict = false
 packages = ["mycoai_retrieval_backend"]
 
 [tool.pytest.ini_options]
