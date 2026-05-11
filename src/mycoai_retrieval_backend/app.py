@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 
 from .config import get_settings
+from .feedback import router as feedback_router
 
 
 def create_app() -> FastAPI:
@@ -28,6 +29,8 @@ def create_app() -> FastAPI:
             "docs": "/docs",
             "health": "/health",
         }
+
+    app.include_router(feedback_router)
 
     return app
 
