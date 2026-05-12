@@ -5,7 +5,7 @@ from typing import Annotated
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile
 from fastapi.responses import FileResponse
 
-from .models import ImageResponse, SegmentPatchRequest
+from .image_models import ImageResponse, SegmentPatchRequest
 from .segmentation import ImageStore, SegmentationPipeline
 
 

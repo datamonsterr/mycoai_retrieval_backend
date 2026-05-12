@@ -4,7 +4,7 @@ import shutil
 from pathlib import Path
 from uuid import uuid4
 
-from .models import BoundingBox, ImageRecord, Segment, SegmentPatchRequest
+from .image_models import BoundingBox, ImageRecord, Segment, SegmentPatchRequest
 
 ALLOWED_METHODS = {"kmeans", "contour"}
 
