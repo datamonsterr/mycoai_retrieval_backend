@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 import sqlite3
-from typing import Annotated
+from typing import Annotated, cast
 from uuid import uuid4
 
 from fastapi import APIRouter, Depends, FastAPI, HTTPException, Query, Request, status
@@ -115,7 +115,14 @@ class AuditLogOut(BaseModel):
 
 
 def get_store(request: Request) -> DataStore:
-    return request.app.state.store
+    return cast(DataStore, request.app.state.store)
+
+
+def count_one(store: DataStore, sql: str, params: tuple[object, ...] = ()) -> int:
+    row = store.query_one(sql, params)
+    if row is None:
+        return 0
+    return int(row["c"])
 
 
 StoreDep = Depends(get_store)
@@ -176,11 +183,13 @@ def get_strain_or_404(store: DataStore, strain_id: str) -> sqlite3.Row:
 
 
 def species_counters(store: DataStore, species_id: str) -> tuple[int, int]:
-    strain_count = store.query_one(
+    strain_count = count_one(
+        store,
         "SELECT COUNT(*) AS c FROM strains WHERE species_id = ?",
         (species_id,),
-    )["c"]
-    image_count = store.query_one(
+    )
+    image_count = count_one(
+        store,
         """
         SELECT COUNT(*) AS c
         FROM images
@@ -188,8 +197,8 @@ def species_counters(store: DataStore, species_id: str) -> tuple[int, int]:
         WHERE strains.species_id = ?
         """,
         (species_id,),
-    )["c"]
-    return int(strain_count), int(image_count)
+    )
+    return strain_count, image_count
 
 
 def make_router() -> APIRouter:
@@ -372,10 +381,11 @@ def make_router() -> APIRouter:
         rows = store.query(" ".join(clauses), tuple(params))
         result: list[StrainOut] = []
         for row in rows:
-            image_count = store.query_one(
+            image_count = count_one(
+                store,
                 "SELECT COUNT(*) AS c FROM images WHERE strain_id = ?",
                 (row["strain_id"],),
-            )["c"]
+            )
             result.append(
                 StrainOut(
                     strain_id=row["strain_id"],
@@ -538,27 +548,22 @@ def make_router() -> APIRouter:
 
     @router.get("/dashboard", response_model=DashboardOut)
     def dashboard(store: Annotated[DataStore, StoreDep]) -> DashboardOut:
-        total_images = int(store.query_one("SELECT COUNT(*) AS c FROM images")["c"])
-        total_strains = int(store.query_one("SELECT COUNT(*) AS c FROM strains")["c"])
-        total_species = int(
-            store.query_one("SELECT COUNT(*) AS c FROM species WHERE is_archived = 0")[
-                "c"
-            ]
+        total_images = count_one(store, "SELECT COUNT(*) AS c FROM images")
+        total_strains = count_one(store, "SELECT COUNT(*) AS c FROM strains")
+        total_species = count_one(
+            store, "SELECT COUNT(*) AS c FROM species WHERE is_archived = 0"
         )
-        total_media_types = int(
-            store.query_one("SELECT COUNT(DISTINCT media) AS c FROM images")["c"]
+        total_media_types = count_one(
+            store, "SELECT COUNT(DISTINCT media) AS c FROM images"
         )
-        learned_count = int(
-            store.query_one(
-                "SELECT COUNT(*) AS c FROM images "
-                "WHERE indexed_in_qdrant = 1 AND is_archived = 0"
-            )["c"]
+        learned_count = count_one(
+            store,
+            "SELECT COUNT(*) AS c FROM images "
+            "WHERE indexed_in_qdrant = 1 AND is_archived = 0",
         )
         pending_count = total_images - learned_count
-        archived_since_last_training = int(
-            store.query_one("SELECT COUNT(*) AS c FROM images WHERE is_archived = 1")[
-                "c"
-            ]
+        archived_since_last_training = count_one(
+            store, "SELECT COUNT(*) AS c FROM images WHERE is_archived = 1"
         )
         species_rows = store.query(
             """
