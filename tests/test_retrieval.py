@@ -20,6 +20,7 @@ from mycoai_retrieval_backend.schemas import RetrieveRequest, RetrieveResponse
 
 client = TestClient(app)
 
+
 def _valid_payload(**overrides: Any) -> dict[str, object]:
     base: dict[str, object] = {
         "strain": "DTO-001-A1",
@@ -73,9 +74,7 @@ class TestRetrieveRequestSchema:
 
     def test_e3_requires_medium(self) -> None:
         with pytest.raises(ValueError, match="e3_medium"):
-            RetrieveRequest.model_validate(
-                _valid_payload(environment_strategy="E3")
-            )
+            RetrieveRequest.model_validate(_valid_payload(environment_strategy="E3"))
 
     def test_e3_with_medium_accepted(self) -> None:
         req = RetrieveRequest.model_validate(
@@ -85,9 +84,7 @@ class TestRetrieveRequestSchema:
 
     def test_e4_requires_exclude_medium(self) -> None:
         with pytest.raises(ValueError, match="e4_exclude_medium"):
-            RetrieveRequest.model_validate(
-                _valid_payload(environment_strategy="E4")
-            )
+            RetrieveRequest.model_validate(_valid_payload(environment_strategy="E4"))
 
     def test_e4_with_exclude_accepted(self) -> None:
         req = RetrieveRequest.model_validate(

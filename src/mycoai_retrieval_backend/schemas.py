@@ -30,9 +30,7 @@ class RetrieveRequest(BaseModel):
         if self.environment_strategy == "E3" and not self.e3_medium:
             raise ValueError("e3_medium required when environment_strategy=E3")
         if self.environment_strategy == "E4" and not self.e4_exclude_medium:
-            raise ValueError(
-                "e4_exclude_medium required when environment_strategy=E4"
-            )
+            raise ValueError("e4_exclude_medium required when environment_strategy=E4")
         if self.environment_strategy == "E1":
             media = {img.media for img in self.images}
             if len(media) > 1:

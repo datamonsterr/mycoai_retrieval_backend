@@ -54,9 +54,7 @@ def load_and_extract_features(crop_path: str) -> np.ndarray:
     return extract_hog_features(img)
 
 
-def get_qdrant_client(
-    qdrant_url: str, qdrant_api_key: str | None
-) -> QdrantClient:
+def get_qdrant_client(qdrant_url: str, qdrant_api_key: str | None) -> QdrantClient:
     return QdrantClient(url=qdrant_url, api_key=qdrant_api_key)
 
 
@@ -179,9 +177,7 @@ def aggregate_predictions(
             )
         elif strategy == "uni":
             count = species_counts[specy]
-            final_score = (
-                count / total_neighbours if total_neighbours > 0 else 0.0
-            )
+            final_score = count / total_neighbours if total_neighbours > 0 else 0.0
         else:
             final_score = float(total_score)
         aggregated.append((specy, final_score))
