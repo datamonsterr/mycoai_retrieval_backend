@@ -40,9 +40,9 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
     app.mount("/static", StaticFiles(directory=str(upload_root)), name="static")
+    app.include_router(create_image_router(store=store, pipeline=pipeline))
     app.include_router(api_router, prefix=settings.api_prefix)
     app.include_router(search_router)
-    app.include_router(create_image_router(store=store, pipeline=pipeline))
 
     @app.exception_handler(AppError)
     async def app_error_handler(request: Request, exc: AppError) -> JSONResponse:
