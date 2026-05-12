@@ -1,6 +1,8 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from .config import get_settings
+from .routes.retrieval import router as retrieval_router
 
 
 def create_app() -> FastAPI:
@@ -12,6 +14,16 @@ def create_app() -> FastAPI:
         docs_url="/docs",
         redoc_url="/redoc",
     )
+
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["http://localhost:5173"],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+
+    app.include_router(retrieval_router)
 
     @app.get("/health", tags=["health"])
     def healthcheck() -> dict[str, str]:
