@@ -32,9 +32,7 @@ def list_training_jobs() -> list[TrainingJob]:
 
 @router.get("/preflight")
 def get_training_preflight(
-    job_type: Annotated[
-        TrainingJobType, Query()
-    ] = TrainingJobType.reindex,
+    job_type: Annotated[TrainingJobType, Query()] = TrainingJobType.reindex,
 ) -> TrainingPreflight:
     return training_service.preflight(job_type)
 

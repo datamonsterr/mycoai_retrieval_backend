@@ -107,9 +107,8 @@ class TrainingService:
             trigger=trigger,
             changes_since_last=preflight_result.changes_since_last,
             started_at=now,
-            estimated_completion=now + timedelta(
-                hours=preflight_result.estimated_training_hours
-            ),
+            estimated_completion=now
+            + timedelta(hours=preflight_result.estimated_training_hours),
             log=[
                 "pre-flight checks passed",
                 f"{job_type.value} job started",
@@ -153,8 +152,7 @@ class TrainingService:
         now = datetime.now(UTC)
         current_version = self._current_model.version
         prior_versions = [
-            v for v in self._current_model.previous_versions
-            if v != request.version
+            v for v in self._current_model.previous_versions if v != request.version
         ]
         self._current_model.previous_versions = [
             current_version,
