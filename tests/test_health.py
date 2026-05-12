@@ -1,18 +1,14 @@
 from fastapi.testclient import TestClient
 
-from mycoai_retrieval_backend.app import app
 
-client = TestClient(app)
-
-
-def test_healthcheck_returns_ok() -> None:
+def test_healthcheck_returns_ok(client: TestClient) -> None:
     response = client.get("/health")
 
     assert response.status_code == 200
     assert response.json()["status"] == "ok"
 
 
-def test_root_exposes_key_endpoints() -> None:
+def test_root_exposes_key_endpoints(client: TestClient) -> None:
     response = client.get("/")
 
     assert response.status_code == 200
@@ -20,4 +16,5 @@ def test_root_exposes_key_endpoints() -> None:
         "name": "MycoAI Retrieval Backend",
         "docs": "/docs",
         "health": "/health",
+        "api": "/api",
     }
