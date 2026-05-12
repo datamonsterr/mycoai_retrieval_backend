@@ -119,6 +119,7 @@ def get_store(request: Request) -> DataStore:
 
 
 StoreDep = Depends(get_store)
+MediaQuery = Annotated[list[str], Query(default_factory=list)]
 
 
 def row_to_species(
@@ -306,7 +307,9 @@ def make_router() -> APIRouter:
             (species_id,),
         )
         store.execute(
-            "UPDATE images SET is_archived = 1 WHERE strain_id IN (SELECT strain_id FROM strains WHERE species_id = ?)",
+            "UPDATE images SET is_archived = 1 "
+            "WHERE strain_id IN "
+            "(SELECT strain_id FROM strains WHERE species_id = ?)",
             (species_id,),
         )
         store.log("archive", "species", species_id, row["name"])
@@ -326,7 +329,9 @@ def make_router() -> APIRouter:
             "UPDATE strains SET is_archived = 0 WHERE species_id = ?", (species_id,)
         )
         store.execute(
-            "UPDATE images SET is_archived = 0 WHERE strain_id IN (SELECT strain_id FROM strains WHERE species_id = ?)",
+            "UPDATE images SET is_archived = 0 "
+            "WHERE strain_id IN "
+            "(SELECT strain_id FROM strains WHERE species_id = ?)",
             (species_id,),
         )
         store.log("restore", "species", species_id, "restored")
@@ -341,7 +346,9 @@ def make_router() -> APIRouter:
             (species_id,),
         )
         store.execute(
-            "DELETE FROM images WHERE strain_id IN (SELECT strain_id FROM strains WHERE species_id = ?)",
+            "DELETE FROM images "
+            "WHERE strain_id IN "
+            "(SELECT strain_id FROM strains WHERE species_id = ?)",
             (species_id,),
         )
         store.execute("DELETE FROM strains WHERE species_id = ?", (species_id,))
@@ -438,13 +445,15 @@ def make_router() -> APIRouter:
     @router.get("/images", response_model=list[ImageOut])
     def list_images(
         store: Annotated[DataStore, StoreDep],
+        media: MediaQuery,
         strain_id: str | None = None,
         species_id: str | None = None,
-        media: list[str] = Query(default_factory=list),
         include_archived: bool = False,
     ) -> list[ImageOut]:
         clauses = [
-            "SELECT images.* FROM images JOIN strains ON strains.strain_id = images.strain_id WHERE (? OR images.is_archived = 0)"
+            "SELECT images.* FROM images "
+            "JOIN strains ON strains.strain_id = images.strain_id "
+            "WHERE (? OR images.is_archived = 0)"
         ]
         params: list[object] = [include_archived]
         if strain_id is not None:
@@ -541,7 +550,8 @@ def make_router() -> APIRouter:
         )
         learned_count = int(
             store.query_one(
-                "SELECT COUNT(*) AS c FROM images WHERE indexed_in_qdrant = 1 AND is_archived = 0"
+                "SELECT COUNT(*) AS c FROM images "
+                "WHERE indexed_in_qdrant = 1 AND is_archived = 0"
             )["c"]
         )
         pending_count = total_images - learned_count
@@ -555,17 +565,21 @@ def make_router() -> APIRouter:
             SELECT species.name, COUNT(images.image_id) AS count
             FROM species
             LEFT JOIN strains ON strains.species_id = species.species_id
-            LEFT JOIN images ON images.strain_id = strains.strain_id AND images.is_archived = 0
+            LEFT JOIN images ON images.strain_id = strains.strain_id
+                AND images.is_archived = 0
             WHERE species.is_archived = 0
             GROUP BY species.species_id
             ORDER BY count DESC, species.name ASC
             """
         )
         medium_rows = store.query(
-            "SELECT media, COUNT(*) AS count FROM images WHERE is_archived = 0 GROUP BY media ORDER BY count DESC, media ASC"
+            "SELECT media, COUNT(*) AS count FROM images "
+            "WHERE is_archived = 0 "
+            "GROUP BY media ORDER BY count DESC, media ASC"
         )
         timeline_rows = store.query(
-            "SELECT substr(created_at, 1, 10) AS day, COUNT(*) AS count FROM images GROUP BY day ORDER BY day ASC"
+            "SELECT substr(created_at, 1, 10) AS day, COUNT(*) AS count "
+            "FROM images GROUP BY day ORDER BY day ASC"
         )
         return DashboardOut(
             total_images=total_images,

@@ -43,7 +43,9 @@ class DataStore:
                 species_id TEXT NOT NULL REFERENCES species(species_id),
                 created_at TEXT NOT NULL,
                 is_archived INTEGER NOT NULL DEFAULT 0,
-                source TEXT NOT NULL CHECK (source IN ('curated_primary', 'incoming_low_quality', 'user_upload'))
+                source TEXT NOT NULL CHECK (
+                    source IN ('curated_primary', 'incoming_low_quality', 'user_upload')
+                )
             );
 
             CREATE TABLE IF NOT EXISTS images (
