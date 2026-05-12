@@ -16,6 +16,11 @@ class Settings(BaseSettings):
     port: int = 8000
     api_prefix: str = "/api"
 
+    jwt_secret: str = "change-me-in-production-use-a-strong-random-secret"
+    jwt_algorithm: str = "HS256"
+    jwt_expire_minutes: int = 60
+    auto_activate_users: bool = True
+
 
 @lru_cache(maxsize=1)
 def get_settings() -> Settings:

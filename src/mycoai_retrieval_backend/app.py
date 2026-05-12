@@ -1,6 +1,10 @@
 from fastapi import FastAPI
 
 from .config import get_settings
+from .routers import auth_router
+from .services.user_store import UserStore
+
+_user_store = UserStore()
 
 
 def create_app() -> FastAPI:
@@ -21,12 +25,15 @@ def create_app() -> FastAPI:
             "environment": settings.environment,
         }
 
+    app.include_router(auth_router, prefix=settings.api_prefix)
+
     @app.get("/", tags=["meta"])
     def root() -> dict[str, str]:
         return {
             "name": settings.app_name,
             "docs": "/docs",
             "health": "/health",
+            "api": settings.api_prefix,
         }
 
     return app
