@@ -45,3 +45,9 @@ def create_refresh_token(user_id: str) -> str:
 def decode_access_token(token: str) -> dict:
     settings = get_settings()
     return jwt.decode(token, settings.jwt_secret, algorithms=[settings.jwt_algorithm])
+
+
+def require_role(user: object, role: str) -> None:
+    roles = getattr(user, "roles", ())
+    if role not in roles:
+        raise PermissionError(f"Missing required role: {role}")
