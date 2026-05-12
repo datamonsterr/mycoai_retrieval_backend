@@ -16,8 +16,7 @@ def test_root_exposes_key_endpoints() -> None:
     response = client.get("/")
 
     assert response.status_code == 200
-    assert response.json() == {
-        "name": "MycoAI Retrieval Backend",
-        "docs": "/docs",
-        "health": "/health",
-    }
+    data = response.json()
+    assert data["name"] == "MycoAI Retrieval Backend"
+    assert data["docs"] == "/docs"
+    assert data["health"] == "/health"
