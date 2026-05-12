@@ -54,14 +54,10 @@ def create_app() -> FastAPI:
 
     @app.get("/api/v1/feedback/inbox", tags=["feedback"])
     def inbox() -> dict[str, object]:
-        return {
-            "feedback": [f.model_dump(mode="json") for f in get_store().inbox()]
-        }
+        return {"feedback": [f.model_dump(mode="json") for f in get_store().inbox()]}
 
     @app.patch("/api/v1/feedback/{feedback_id}", tags=["feedback"])
-    def review_feedback(
-        feedback_id: str, payload: FeedbackReview
-    ) -> dict[str, object]:
+    def review_feedback(feedback_id: str, payload: FeedbackReview) -> dict[str, object]:
         try:
             record = get_store().review_one(feedback_id, payload)
         except KeyError as exc:
@@ -79,9 +75,7 @@ def create_app() -> FastAPI:
     @app.post("/api/v1/feedback/batch", tags=["feedback"])
     def review_feedback_batch(payload: FeedbackBatchReview) -> dict[str, object]:
         records = get_store().review_batch(payload)
-        return {
-            "feedback": [record.model_dump(mode="json") for record in records]
-        }
+        return {"feedback": [record.model_dump(mode="json") for record in records]}
 
     @app.get("/api/v1/feedback/stats", tags=["feedback"])
     def feedback_stats() -> dict[str, object]:

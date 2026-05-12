@@ -111,9 +111,7 @@ class FeedbackStore:
 
     def notifications_for(self, user_id: str) -> list[Notification]:
         return [
-            n
-            for n in self.notifications
-            if str(n.user_id) == user_id and not n.read
+            n for n in self.notifications if str(n.user_id) == user_id and not n.read
         ]
 
     def mark_notification_read(self, notification_id: str) -> None:
