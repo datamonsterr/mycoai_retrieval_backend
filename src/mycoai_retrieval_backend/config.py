@@ -19,12 +19,9 @@ class Settings(BaseSettings):
     port: int = 8000
     api_prefix: str = "/api"
     database_url: str = Field(
-        default="sqlite+aiosqlite:///./mycoai.db",
+        default="postgresql+asyncpg://mycoai:mycoai@localhost:5432/mycoai",
         validation_alias="DATABASE_URL",
     )
-
-    # Database
-    database_url: str = "postgresql+asyncpg://mycoai:mycoai@localhost:5432/mycoai"
 
     # Qdrant
     qdrant_host: str = "localhost"
