@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 
 from .config import get_settings
+from .training import router as training_router
 
 
 def create_app() -> FastAPI:
@@ -29,6 +30,7 @@ def create_app() -> FastAPI:
             "health": "/health",
         }
 
+    app.include_router(training_router)
     return app
 
 
