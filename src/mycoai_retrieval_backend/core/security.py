@@ -1,18 +1,53 @@
-from dataclasses import dataclass
-from typing import Literal
+import uuid
+from datetime import UTC, datetime
 
-RoleName = Literal["admin", "scientist", "viewer"]
+import bcrypt
+import jwt
 
-
-@dataclass(frozen=True)
-class User:
-    id: str
-    email: str
-    roles: tuple[RoleName, ...]
-    service: str
+from .config import get_settings
 
 
-def require_role(user: User, role: RoleName) -> None:
-    if role not in user.roles:
-        msg = f"Missing required role: {role}"
-        raise PermissionError(msg)
+def hash_password(password: str) -> str:
+    return bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
+
+
+def verify_password(plain: str, hashed: str) -> bool:
+    return bcrypt.checkpw(plain.encode(), hashed.encode())
+
+
+def create_access_token(user_id: str, role: str) -> str:
+    settings = get_settings()
+    now = datetime.now(UTC)
+    payload = {
+        "sub": user_id,
+        "role": role,
+        "type": "access",
+        "iat": now,
+        "exp": now.timestamp() + settings.access_token_expire_seconds,
+        "jti": str(uuid.uuid4()),
+    }
+    return jwt.encode(payload, settings.jwt_secret, algorithm=settings.jwt_algorithm)
+
+
+def create_refresh_token(user_id: str) -> str:
+    settings = get_settings()
+    now = datetime.now(UTC)
+    payload = {
+        "sub": user_id,
+        "type": "refresh",
+        "iat": now,
+        "exp": now.timestamp() + settings.refresh_token_expire_seconds,
+        "jti": str(uuid.uuid4()),
+    }
+    return jwt.encode(payload, settings.jwt_secret, algorithm=settings.jwt_algorithm)
+
+
+def decode_access_token(token: str) -> dict:
+    settings = get_settings()
+    return jwt.decode(token, settings.jwt_secret, algorithms=[settings.jwt_algorithm])
+
+
+def require_role(user: object, role: str) -> None:
+    roles = getattr(user, "roles", ())
+    if role not in roles:
+        raise PermissionError(f"Missing required role: {role}")

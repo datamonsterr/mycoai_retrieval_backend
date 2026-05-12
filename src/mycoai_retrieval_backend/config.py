@@ -17,22 +17,16 @@ class Settings(BaseSettings):
     environment: str = "development"
     host: str = "0.0.0.0"
     port: int = 8000
-    api_prefix: str = "/api"
+    api_prefix: str = "/api/v1"
     database_url: str = Field(
         default="postgresql+asyncpg://mycoai:mycoai@localhost:5432/mycoai",
         validation_alias="DATABASE_URL",
     )
-
-    # Qdrant
     qdrant_host: str = "localhost"
     qdrant_port: int = 6333
     qdrant_api_key: str = ""
-
-    # Celery / Redis
     celery_broker_url: str = "redis://localhost:6379/0"
     celery_result_backend: str = "redis://localhost:6379/0"
-
-    # JWT Auth
     jwt_secret_key: str = "change-me-in-production"
     jwt_algorithm: str = "HS256"
     jwt_access_token_expire_minutes: int = 30
